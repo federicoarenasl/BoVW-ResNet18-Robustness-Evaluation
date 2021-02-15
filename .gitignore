@@ -1,2 +1,5 @@
 catdog/
 tutorials/data/
+/__pycache__
+/test.py
+/tutorials/data
