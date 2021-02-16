@@ -86,10 +86,10 @@ def train_model(model, dataloaders, criterion, optimizer, device, num_epochs=25,
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
             if phase == 'val':
-                val_acc_history.append(epoch_acc)
+                val_acc_history.append(epoch_acc.numpy())
                 val_loss_history.append(epoch_loss)
             else:
-                train_acc_history.append(epoch_acc)
+                train_acc_history.append(epoch_acc.numpy())
                 train_loss_history.append(epoch_loss)
 
     time_elapsed = time.time() - since
@@ -99,7 +99,7 @@ def train_model(model, dataloaders, criterion, optimizer, device, num_epochs=25,
     # load best model weights
     model.load_state_dict(best_model_wts)
 
-    return model, val_acc_history, val_loss_history, train_acc_history, train_loss_history, best_acc, time_elapsed
+    return model, val_acc_history, val_loss_history, train_acc_history, train_loss_history, best_acc.numpy(), time_elapsed
 
 def set_parameter_requires_grad(model, feature_extracting):
     if feature_extracting:
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     data_dir = "./data"
     model_name = "resnet"
     num_classes = 2
-    batch_size = 10
+    batch_size = 50
     num_epochs = 1
     # Flag for feature extracting. When False, we finetune the whole model,
     # when True we only update the reshaped layer params
@@ -223,7 +223,7 @@ if __name__ == "__main__":
         training_output['val_loss'] = val_loss_history
         training_output['val_acc'] = val_acc_history
         training_output['best_acc'] = [best_acc]*num_epochs
-        training_output['runtime'] = [time_elapsed]*num_epochs
+        training_output['runtime(s)'] = [time_elapsed]*num_epochs
         
         # Output data
         root_output_dir = "./output/progress/"
