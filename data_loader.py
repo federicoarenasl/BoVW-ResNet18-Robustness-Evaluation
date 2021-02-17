@@ -15,6 +15,7 @@ from sklearn.model_selection import StratifiedKFold
 from PIL import Image
 from tqdm import tqdm
 from shutil import copyfile
+from sklearn.utils import shuffle
 
 DOGS_PATH = "./catdog/DOGS/"
 CATS_PATH = "./catdog/CATS/"
@@ -64,7 +65,6 @@ def create_dirs(root_dir, splits, classes):
                 os.makedirs(root_dir+split_name+'/val/'+c+'/')
 
 
-
 def replace_files(dataset):
     root_dir = './data/'
 
@@ -92,6 +92,7 @@ def replace_files(dataset):
             else:
                 new_path = root_dir+split_name+'/val/'+dog_or_cat+'/'+old_file_name
                 copyfile(old_path, new_path)
+
 
 if __name__ == '__main__':
     dataset = pd.read_csv('catdogs.csv')
