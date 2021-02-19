@@ -12,6 +12,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data import BatchSampler
 from torchvision.transforms import transforms
 from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedShuffleSplit
 from PIL import Image
 from tqdm import tqdm
 from shutil import copyfile
@@ -64,36 +65,65 @@ def create_dirs(root_dir, splits, classes):
             if not os.path.exists(root_dir+split_name+'/val/'+c+'/'):
                 os.makedirs(root_dir+split_name+'/val/'+c+'/')
 
+def create_split_indexes(data):
+    X_indexes = np.array(list(data.index))
+    Y = np.array(list(data['label']))
 
-def replace_files(dataset):
+    kfold = StratifiedShuffleSplit(n_splits=3, test_size=1/3, random_state=0)
+    kfold.get_n_splits(X_indexes, Y)
+
+    splits = {}
+    split_counter = 0
+    for train_index, test_index in kfold.split(X_indexes, Y):
+        split_counter += 1
+        train_val = {}
+        X_train, X_test = X_indexes[train_index], X_indexes[test_index]
+        train_val['train'] = X_train
+        train_val['val'] = X_test
+        splits[split_counter] = train_val
+    
+    return splits
+
+def map_to_file(splits, data):
+    file_names = list(data['image_id'])
+    for split, sets in splits.items():
+        for set_, indexes in sets.items():
+            paths = []
+            for i in indexes:
+                paths.append(file_names[i])
+            splits[split][set_] = paths
+    return splits
+
+def copy_files(file_splits):
     root_dir = './data/'
-
-    splits = {1:['A','B','C'], 2:['B','C','A'], 3: ['A', 'C', 'B']}
-
+    splits = [1,2,3]
     classes = ['cat', 'dog']
 
     # Create directories, if necessary
     create_dirs(root_dir, splits, classes)
-
-    for split in splits:
-        print(f"On split {split}")
-        for line in tqdm(range(len(dataset))):
-            old_path = list(dataset['image_id'])[line]
-            old_file_name = old_path.split('/')[-1]
-            fold = list(dataset['folder'])[line]
-
-            split_name = 'split_'+str(split)
-
-            dog_or_cat = old_file_name.split('_')[0]            
-
-            if fold == splits[split][0] or fold == splits[split][1]:
-                new_path = root_dir+split_name+'/train/'+dog_or_cat+'/'+old_file_name
-                copyfile(old_path, new_path)         
-            else:
-                new_path = root_dir+split_name+'/val/'+dog_or_cat+'/'+old_file_name
+    print("Going through each split")
+    for split, sets in tqdm(file_splits.items()):
+        for set_, file_names in sets.items():
+            print(f"Copying {set_} files")
+            for file_name in tqdm(file_names):
+                # Get old file name
+                old_path = file_name
+                old_file_name = old_path.split('/')[-1]
+                # Get new file name
+                split_name = 'split_'+str(split)
+                dog_or_cat = old_file_name.split('_')[0]
+                new_path = root_dir+split_name+'/'+set_+'/'+dog_or_cat+'/'+old_file_name
+                # Copy data to new folders
                 copyfile(old_path, new_path)
 
 
 if __name__ == '__main__':
+    print("Loading data...")
+    # Retreiving data locations dataframe
     dataset = pd.read_csv('catdogs.csv')
-    replace_files(dataset)
+    # Create split indexes
+    splits_dict = create_split_indexes(dataset)
+    # Map indices to file_names
+    file_splits = map_to_file(splits_dict, dataset)
+    # Create directories and copy files to directories
+    copy_files(file_splits)
