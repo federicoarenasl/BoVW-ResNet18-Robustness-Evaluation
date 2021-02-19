@@ -171,7 +171,7 @@ if __name__ == "__main__":
     model_name = "resnet"
     num_classes = 2
     batch_size = 50
-    num_epochs = 1
+    num_epochs = 50
     # Flag for feature extracting. When False, we finetune the whole model,
     # when True we only update the reshaped layer params
     feature_extract = True
