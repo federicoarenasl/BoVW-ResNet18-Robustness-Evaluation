@@ -1,3 +1,4 @@
+# Library imports
 import os.path
 from os import path
 import numpy as np
@@ -18,11 +19,13 @@ from tqdm import tqdm
 from shutil import copyfile
 from sklearn.utils import shuffle
 
+# Define data paths
 DOGS_PATH = "./catdog/DOGS/"
 CATS_PATH = "./catdog/CATS/"
 DATA_PATH = "./catdogs.csv"
 
 
+# Create csv file of all data paths
 def create_csv():
     dog_imgs = np.array([["./catdog/DOGS/" + name, 0] for name in os.listdir(DOGS_PATH) if os.path.isfile(os.path.join(DOGS_PATH, name))])
     dog_imgs = dog_imgs[1:] # Remove the .DS_Store file
@@ -30,16 +33,10 @@ def create_csv():
     cat_imgs = cat_imgs[1:] # Remove the .DS_Store file
     imgs = np.concatenate([dog_imgs, cat_imgs]) 
 
-    a = np.full(imgs.shape[0]//3, 'A')
-    b = np.full(imgs.shape[0]//3, 'B')
-    c = np.full(imgs.shape[0]//3, 'C')
-    folders = np.concatenate([a, b, c])
-    np.random.shuffle(folders)
-
-    df = pd.DataFrame({"image_id": imgs[:, 0], "folder": folders, "label": imgs[:, 1]}) 
+    df = pd.DataFrame({"image_id": imgs[:, 0], "label": imgs[:, 1]}) 
     df.to_csv('catdogs.csv', index=False) # Save DataFrame as a csv file
 
-
+# Create folders to store the new splits in
 def create_dirs(root_dir, splits, classes):
     # Create root directory, if it does not exist
     if not os.path.exists(root_dir):
@@ -65,6 +62,7 @@ def create_dirs(root_dir, splits, classes):
             if not os.path.exists(root_dir+split_name+'/val/'+c+'/'):
                 os.makedirs(root_dir+split_name+'/val/'+c+'/')
 
+# Perform stratified splits on the data
 def create_split_indexes(data):
     X_indexes = np.array(list(data.index))
     Y = np.array(list(data['label']))
@@ -84,6 +82,7 @@ def create_split_indexes(data):
     
     return splits
 
+# From index splits, map this to the file names in the .csv file
 def map_to_file(splits, data):
     file_names = list(data['image_id'])
     for split, sets in splits.items():
@@ -94,16 +93,22 @@ def map_to_file(splits, data):
             splits[split][set_] = paths
     return splits
 
+# Copy files from catdog directory to splits directory
 def copy_files(file_splits):
+    # Initial information definition
     root_dir = './data/'
     splits = [1,2,3]
     classes = ['cat', 'dog']
-
     # Create directories, if necessary
     create_dirs(root_dir, splits, classes)
     print("Going through each split")
     for split, sets in tqdm(file_splits.items()):
+        # Iterate through classes
         for set_, file_names in sets.items():
+            # Initialize storage units
+            df_dict = {}
+            files = []
+            classes_ = []
             print(f"Copying {set_} files")
             for file_name in tqdm(file_names):
                 # Get old file name
@@ -115,8 +120,18 @@ def copy_files(file_splits):
                 new_path = root_dir+split_name+'/'+set_+'/'+dog_or_cat+'/'+old_file_name
                 # Copy data to new folders
                 copyfile(old_path, new_path)
+                # Store data for csv
+                files.append(new_path)
+                classes_.append(classes.index(dog_or_cat))
 
+            # Output csv
+            df_dict['image_id'] = files
+            df_dict['label'] = classes_
+            split_str = 'split_'+str(split)
+            file_name = root_dir+'/'+split_str+'/'+split_str+'_'+set_+'.csv'
+            pd.DataFrame.from_dict(df_dict).to_csv(file_name, index=False)
 
+# Create data splits
 if __name__ == '__main__':
     print("Loading data...")
     # Retreiving data locations dataframe
