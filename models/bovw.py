@@ -110,7 +110,7 @@ def train_svm(visual_words, labels):
     Y_train = labels
 
     # Initialize SVM classifier
-    svc_classifier = SVC(C=100000000,kernel = "linear")
+    svc_classifier = SVC(C=1000,kernel = "linear")
     svc_classifier.fit(X_train, Y_train)
     
     return svc_classifier
@@ -133,7 +133,6 @@ if __name__ == '__main__':
     train_descriptor_list, train_sift_vectors = sift_features(train_dict)
     print('Get full sift features for validation data...')
     val_descriptor_list, val_sift_vectors = sift_features(val_dict)
-    np.save('output/bovw/train_sift_vectors.npy', train_sift_vectors)
 
     # Perform kmeans training to get visual words
     print('Perform clustering on training data...')
