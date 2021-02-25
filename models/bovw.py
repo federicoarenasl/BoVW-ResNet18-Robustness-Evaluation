@@ -75,7 +75,7 @@ def kmeans(k, descriptor_list):
     of cluster(k) and the other is descriptors list(unordered 1d array)
     Returns an array that holds central points.
     '''
-    kmeans = KMeans(n_clusters = k, n_init=1, verbose=1)
+    kmeans = KMeans(n_clusters = k, n_init=10, verbose=1)
     kmeans.fit(descriptor_list)
 
     return kmeans
@@ -104,20 +104,21 @@ def get_histograms(images, k, kmeans):
     return np.array(hists), np.array(classes)
 
 # Initialize SVM classifier
-def train_svm(visual_words, labels):
+def train_svm(visual_words, labels, c, kernel):
     # Get training data
     X_train = visual_words
     Y_train = labels
 
     # Initialize SVM classifier
-    svc_classifier = SVC(C=1000,kernel = "linear")
+    svc_classifier = SVC(C=c, kernel=kernel, gamma="auto")
     svc_classifier.fit(X_train, Y_train)
     
     return svc_classifier
 
 
 if __name__ == '__main__':
-    '''
+    K = 200
+    
     # Convert dataframe to dictionary of images
     print('Convert dataframe to dictionary of images')
     split_n = 1
@@ -136,21 +137,21 @@ if __name__ == '__main__':
 
     # Perform kmeans training to get visual words
     print('Perform clustering on training data...')
-    train_k_means = kmeans(20, train_descriptor_list)
+    train_k_means = kmeans(K, train_descriptor_list)
     print('Perform clustering on validation data...')
-    val_k_means = kmeans(20, val_descriptor_list)
+    val_k_means = kmeans(K, val_descriptor_list)
 
     # Get visual words
     print("Get training histograms from kmeans clustering")
-    train_histograms, train_classes = get_histograms(train_dict, 20, train_k_means)
+    train_histograms, train_classes = get_histograms(train_dict, K, train_k_means)
     np.save('output/bovw/train_visual_words.npy', train_histograms)
     np.save('output/bovw/train_classes.npy', train_classes)
 
     print("Get validation histograms from kmeans clustering")
-    val_histograms, val_classes = get_histograms(val_dict, 20, val_k_means)
+    val_histograms, val_classes = get_histograms(val_dict, K, val_k_means)
     np.save('output/bovw/val_visual_words.npy', val_histograms)
     np.save('output/bovw/val_classes.npy', val_classes)
-    '''
+    
     # Load data
     train_histograms = np.load('output/bovw/train_visual_words.npy')
     train_classes = np.load('output/bovw/train_classes.npy')
@@ -159,8 +160,13 @@ if __name__ == '__main__':
 
     # Train SVM classifier
     print("Train SVM classifier")
-    svm_classifier = train_svm(train_histograms, train_classes)
+    c_values = [2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9]
+    kernels = ['poly', 'rbf']
+    for c in c_values:
+        for kernel in kernels:
+            svm_classifier = train_svm(train_histograms, train_classes, c, kernel)
 
-    print("Training accuracy:", svm_classifier.score(train_histograms, train_classes))
-    print("Validation accuracy:", svm_classifier.score(val_histograms, val_classes))
+            print("---\tC: {};\tKernel: {}\t---".format(c, kernel))
+            print("\tTraining accuracy:\t", svm_classifier.score(train_histograms, train_classes))
+            print("\tValidation accuracy:\t", svm_classifier.score(val_histograms, val_classes))
 
