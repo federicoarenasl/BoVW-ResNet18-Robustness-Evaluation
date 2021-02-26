@@ -77,8 +77,9 @@ def kmeans(k, descriptor_list):
     '''
     kmeans = KMeans(n_clusters = k, n_init=10, verbose=1)
     kmeans.fit(descriptor_list)
+    vwords = kmeans.cluster_centers_
 
-    return kmeans
+    return kmeans, vwords
 
 # Extract visual words from descriptors  
 def get_histograms(images, k, kmeans):
@@ -117,8 +118,7 @@ def train_svm(visual_words, labels, c, kernel):
 
 
 if __name__ == '__main__':
-    K = 200
-    
+    K = 20
     # Convert dataframe to dictionary of images
     print('Convert dataframe to dictionary of images')
     split_n = 1
@@ -137,9 +137,9 @@ if __name__ == '__main__':
 
     # Perform kmeans training to get visual words
     print('Perform clustering on training data...')
-    train_k_means = kmeans(K, train_descriptor_list)
+    train_k_means, train_centers = kmeans(K, train_descriptor_list)
     print('Perform clustering on validation data...')
-    val_k_means = kmeans(K, val_descriptor_list)
+    val_k_means, valid_centers = kmeans(K, val_descriptor_list)
 
     # Get visual words
     print("Get training histograms from kmeans clustering")
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     val_histograms, val_classes = get_histograms(val_dict, K, val_k_means)
     np.save('output/bovw/val_visual_words.npy', val_histograms)
     np.save('output/bovw/val_classes.npy', val_classes)
-    
+
     # Load data
     train_histograms = np.load('output/bovw/train_visual_words.npy')
     train_classes = np.load('output/bovw/train_classes.npy')
@@ -160,7 +160,7 @@ if __name__ == '__main__':
 
     # Train SVM classifier
     print("Train SVM classifier")
-    c_values = [2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9]
+    c_values = [2] #, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9]
     kernels = ['poly', 'rbf']
     for c in c_values:
         for kernel in kernels:
