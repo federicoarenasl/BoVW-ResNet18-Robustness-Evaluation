@@ -6,3 +6,4 @@ tutorials/data/
 /data
 output/weights
 output/bovw/train_sift_vectors.npy
+.ipynb_checkpoints/
