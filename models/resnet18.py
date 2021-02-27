@@ -19,8 +19,8 @@ INPUT_SIZE = 224
 
 class ResNet18:
     def __init__(self, input_data_dir = "./data",
-                 output_progress_dir = "./output/resnet18/",
-                 output_model_dir = "./output/models",
+                 output_progress_dir = "./output/resnet18/progress",
+                 output_model_dir = "./output/resnet18/models",
                  on_split,
                  batch_size = 50, 
                  num_epochs = 50,
@@ -247,5 +247,5 @@ class ResNet18:
 #----------------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    
+
  
