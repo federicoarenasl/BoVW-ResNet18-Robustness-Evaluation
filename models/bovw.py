@@ -10,6 +10,8 @@ from sklearn.cluster import KMeans
 from sklearn.utils import shuffle
 from sklearn.svm import SVC
 from tqdm import tqdm
+from scipy.spatial import distance
+
 
 # Get dataset of data split
 def get_splits(split_n):
@@ -81,28 +83,35 @@ def kmeans(k, descriptor_list):
 
     return kmeans, vwords
 
+# Find index helper function
+def find_index(image, center):
+    count = 0
+    ind = 0
+    for i in range(len(center)):
+        if(i == 0):
+           count = distance.euclidean(image, center[i]) 
+        else:
+            dist = distance.euclidean(image, center[i]) 
+            if(dist < count):
+                ind = i
+                count = dist
+    return ind
+
 # Extract visual words from descriptors  
-def get_histograms(images, k, kmeans):
+def get_histograms(sift_vectors, centers):
     '''
     '''    
-    hists = []
-    classes = []
-    sift = cv2.xfeatures2d.SIFT_create()
-    for key,value in tqdm(images.items()):
-        for img in tqdm(value):
-            kp, des = sift.detectAndCompute(img,None)
-
-            hist = np.zeros(k)
-            nkp = np.size(kp)
-
-            for d in des:
-                index = kmeans.predict([d])
-                hist[index] += 1/nkp # Normalization of histograms
-        
-            hists.append(hist)
-            classes.append(key)
-
-    return np.array(hists), np.array(classes)
+    dict_feature = {}
+    for key,value in sift_vectors.items():
+        category = []
+        for img in value:
+            histogram = np.zeros(len(centers))
+            for each_feature in img:
+                ind = find_index(each_feature, centers)
+                histogram[ind] += 1
+            category.append(histogram)
+        dict_feature[key] = category
+    return dict_feature
 
 # Initialize SVM classifier
 def train_svm(visual_words, labels, c, kernel):
