@@ -12,6 +12,7 @@ from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScalerfrom tqdm import tqdm
 from scipy.spatial import distance
+from tqdm import tqdm
 
 # Define BovW class
 class BovW:
