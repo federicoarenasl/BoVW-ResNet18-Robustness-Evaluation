@@ -28,9 +28,7 @@ DATA_PATH = "./catdogs.csv"
 # Create csv file of all data paths
 def create_csv():
     dog_imgs = np.array([["./catdog/DOGS/" + name, 0] for name in os.listdir(DOGS_PATH) if os.path.isfile(os.path.join(DOGS_PATH, name))])
-    #dog_imgs = dog_imgs[1:] # Remove the .DS_Store file
     cat_imgs = np.array([["./catdog/CATS/" + name, 1] for name in os.listdir(CATS_PATH) if os.path.isfile(os.path.join(CATS_PATH, name))])
-    #cat_imgs = cat_imgs[1:] # Remove the .DS_Store file
     imgs = np.concatenate([dog_imgs, cat_imgs])
 
     df = pd.DataFrame({"image_id": imgs[:, 0], "abc": np.full(imgs.shape[0], ""), "label": imgs[:, 1]})
@@ -56,26 +54,33 @@ def create_csv():
                 
     df.to_csv('catdogs.csv', index=False) # Save DataFrame as a csv file
 
-# Create three splits ([train=A+B, test=C], [train=A+C, test=B], [train=B+C, test=A])
-def create_splits(dataframe):
-    train_folds = [['A', 'B'], ['A', 'C'], ['B', 'C']]
-    splits = {}
 
-    # Create splits
+def split(dataframe, full_split=False):
+    train_folds = [['A', 'B'], ['A', 'C'], ['B', 'C']]
+
+    splits = {}
     for i, train in enumerate(train_folds):
         split = {}
         split['train'] = dataframe[dataframe.abc.isin(train)]
         split['test'] = dataframe[~dataframe.abc.isin(train)]
 
-        splits['split_{}'.format(i+1)] = split
-        
-    # Divide each split's training data into train (75%) and validation (25%) with balanced breeds
+        if full_split:
+            splits['full_split_{}'.format(i+1)] = split
+        else:
+            splits['split_{}'.format(i+1)] = split
+
+    return splits
+
+# Divide each split's training data into train (75%) and validation (25%) with balanced breeds
+def divide_train_val_test(dataframe, splits):
     classes = [('dog', DOGS_PATH), ('cat', CATS_PATH)]
     breeds = np.arange(1, 13)
     for i in range(1, 4):
-        split_train = pd.DataFrame({"image_id": splits['split_{}'.format(i)]['train'].image_id,
+        split_train = pd.DataFrame(
+                                { "image_id": splits['split_{}'.format(i)]['train'].image_id,
                                   "train_val_test": np.full(splits['split_{}'.format(i)]['train'].shape[0], ""),
-                                  "label": splits['split_{}'.format(i)]['train'].label})
+                                  "label": splits['split_{}'.format(i)]['train'].label
+                                })
         for animal, path in classes:
             for breed in breeds:
                 breed_df = split_train[split_train.image_id.str.startswith(path + animal + '_{}_'.format(breed))]
@@ -89,52 +94,94 @@ def create_splits(dataframe):
                     
         splits['split_{}'.format(i)]['train'] = split_train
         splits['split_{}'.format(i)]['test'] = pd.DataFrame(
-                                    {"image_id": splits['split_{}'.format(i)]['test'].image_id,
+                                { "image_id": splits['split_{}'.format(i)]['test'].image_id,
                                   "train_val_test": np.full(splits['split_{}'.format(i)]['test'].shape[0], "test"),
-                                  "label": splits['split_{}'.format(i)]['test'].label})
+                                  "label": splits['split_{}'.format(i)]['test'].label
+                                })
+
+    return splits
+
+# Changes test data to validation to be compatible with the Resnet's dataloaders
+# There is no test set
+def divide_train_val(dataframe, splits):    
+    for i in range(1, 4):
+        splits['full_split_{}'.format(i)]['train'] = pd.DataFrame(
+                                { "image_id": splits['full_split_{}'.format(i)]['train'].image_id,
+                                  "train_val_test": np.full(splits['full_split_{}'.format(i)]['train'].shape[0], "train"),
+                                  "label": splits['full_split_{}'.format(i)]['train'].label
+                                })
+        splits['full_split_{}'.format(i)]['test'] = pd.DataFrame(
+                                { "image_id": splits['full_split_{}'.format(i)]['test'].image_id,
+                                  "train_val_test": np.full(splits['full_split_{}'.format(i)]['test'].shape[0], "val"),
+                                  "label": splits['full_split_{}'.format(i)]['test'].label
+                                })
+                        
+    return splits
+
+# Create three splits ([train=A+B, test=C], [train=A+C, test=B], [train=B+C, test=A])
+def create_splits(dataframe, full_split=False):
+    # Create splits
+    splits = split(dataframe, full_split)
+
+    if full_split:
+        splits = divide_train_val(dataframe, splits)        
+    else:
+        splits = divide_train_val_test(dataframe, splits)
         
     return splits
 
+# Create directory if it does not exist
+def create_dir(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
-# Create folders to store the new splits in
+
+# Create directories to store the new splits in
 def create_dirs(root_dir, split_names, classes):
-    # Create root directory, if it does not exist
-    if not os.path.exists(root_dir):
-        os.makedirs(root_dir)
+    # Create root directory
+    create_dir(root_dir)
     
     for split_name in split_names:
-        # Create split directory, if it does not exist
-        if not os.path.exists(root_dir+split_name):
-            os.makedirs(root_dir+split_name)
+        # Create split directory
+        create_dir(root_dir+split_name)
+
+        # Create full_split directory
+        create_dir(root_dir+'full_'+split_name)
         
-        # Create train directory for the current split, if it does not exist
-        if not os.path.exists(root_dir+split_name+'/train/'):
-            os.makedirs(root_dir+split_name+'/train/')
-        # Create validation directory for the current split, if it does not exist
-        if not os.path.exists(root_dir+split_name+'/train/'):
-            os.makedirs(root_dir+split_name+'/val/')
-        # Create test directory for the current split, if it does not exist
-        if not os.path.exists(root_dir+split_name+'/test/'):
-            os.makedirs(root_dir+split_name+'/test/')
+        # Create train directory for the current split
+        create_dir(root_dir+split_name+'/train/')
+        # Create validation directory for the current split
+        create_dir(root_dir+split_name+'/val/')
+        # Create test directory for the current split
+        create_dir(root_dir+split_name+'/test/')
+
+        # Create train directory for the current full_split
+        create_dir(root_dir+'full_'+split_name+'/train/')
+        # Create validation directory for the current split
+        create_dir(root_dir+'full_'+split_name+'/val/')
 
         for c in classes:
-            # Create class directories for the current split, if it does not exist
-            if not os.path.exists(root_dir+split_name+'/train/'+c+'/'):
-                os.makedirs(root_dir+split_name+'/train/'+c+'/')
-            if not os.path.exists(root_dir+split_name+'/val/'+c+'/'):
-                os.makedirs(root_dir+split_name+'/val/'+c+'/')
-            if not os.path.exists(root_dir+split_name+'/test/'+c+'/'):
-                os.makedirs(root_dir+split_name+'/test/'+c+'/')
+            # Create class directories for the current split
+            create_dir(root_dir+split_name+'/train/'+c+'/')
+            create_dir(root_dir+split_name+'/val/'+c+'/')
+            create_dir(root_dir+split_name+'/test/'+c+'/')
+
+            # Create class directories for the current full_split
+            create_dir(root_dir+'full_'+split_name+'/train/'+c+'/')
+            create_dir(root_dir+'full_'+split_name+'/val/'+c+'/')
 
 # Copy files from catdog directory to splits directory
-def copy_files(file_splits):
+def copy_files(splits, full_split=False):
     # Initial information definition
     root_dir = './data/'
-    split_names = file_splits.keys()
+    split_names = splits.keys()
     classes = ['dog', 'cat']
     # Create directories, if necessary
-    create_dirs(root_dir, splits, classes)
+    if not os.path.exists(root_dir):
+        print("Creating data directories...")
+        create_dirs(root_dir, splits, classes)
     
+    print("Going through each split")
     for split_name in tqdm(split_names):
         # Copy files to train and validation sets
         train_df_dict = {}
@@ -185,16 +232,21 @@ def copy_files(file_splits):
         pd.DataFrame.from_dict(train_df_dict).to_csv(file_name, index=False)
 
         # Create .csv with validation file names and labels
-        val_df_dict['image_id'] = val_files
-        val_df_dict['label'] = val_labels
-        file_name = root_dir+'/'+split_name+'/'+split_name+'_val.csv'
-        pd.DataFrame.from_dict(val_df_dict).to_csv(file_name, index=False)
+        if not full_split:
+            val_df_dict['image_id'] = val_files
+            val_df_dict['label'] = val_labels
+            file_name = root_dir+'/'+split_name+'/'+split_name+'_val.csv'
+            pd.DataFrame.from_dict(val_df_dict).to_csv(file_name, index=False)
 
         # Create .csv with test file names and labels
         test_df_dict['image_id'] = test_files
         test_df_dict['label'] = test_labels
-        file_name = root_dir+'/'+split_name+'/'+split_name+'_test.csv'
-        pd.DataFrame.from_dict(test_df_dict).to_csv(file_name, index=False)  
+        if full_split:
+            file_name = root_dir+'/'+split_name+'/'+split_name+'_val.csv'
+            pd.DataFrame.from_dict(test_df_dict).to_csv(file_name, index=False)  
+        else:
+            file_name = root_dir+'/'+split_name+'/'+split_name+'_test.csv'
+            pd.DataFrame.from_dict(test_df_dict).to_csv(file_name, index=False)
 
 # Create data splits
 if __name__ == '__main__':
@@ -208,7 +260,9 @@ if __name__ == '__main__':
     # Create splits
     print("Creating splits...")
     splits = create_splits(dataset)
+    full_splits = create_splits(dataset, full_split=True)
 
     # Create directories and copy files to directories
     print("Copying files...")
     copy_files(splits)
+    copy_files(full_splits, full_split=True)
