@@ -10,7 +10,7 @@ from sklearn.cluster import KMeans
 from sklearn.utils import shuffle
 from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScalerfrom tqdm import tqdm
+from sklearn.preprocessing import StandardScaler
 from scipy.spatial import distance
 from tqdm import tqdm
 
@@ -182,11 +182,11 @@ class BovW:
         print("Get histograms from kmeans clustering")
         train_histograms, train_classes = self.get_histogram_arrays(train_sift_vectors, train_centers)
         np.save("output/bovw/split_"+str(self.split_n)+"/histograms/train_visual_words_k_"+str(K_clusters)+".npy", train_histograms)
-        np.save("output/bovw/split_"+str(self.split_n)+"/classes/train_classes_k_"+str(K_clusters)+".npy", train_classes)
+        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/train_classes_k_"+str(K_clusters)+".npy", train_classes)
         print("Get validation histograms from kmeans clustering")
         val_histograms, val_classes = self.get_histogram_arrays(val_sift_vectors, valid_centers)
         np.save("output/bovw/split_"+str(self.split_n)+"/histograms/val_visual_words_k_"+str(K_clusters)+".npy", val_histograms)
-        np.save("output/bovw/split_"+str(self.split_n)+"/classes/val_classes_k_"+str(K_clusters)+".npy", val_classes)
+        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/val_classes_k_"+str(K_clusters)+".npy", val_classes)
 
 
 
