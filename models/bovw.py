@@ -9,173 +9,183 @@ from scipy.spatial import distance
 from sklearn.cluster import KMeans
 from sklearn.utils import shuffle
 from sklearn.svm import SVC
-from tqdm import tqdm
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScalerfrom tqdm import tqdm
 from scipy.spatial import distance
 
+# Define BovW class
+class BovW:
+    def __init__(self, split_n, data_dir, full_split = False):
+        self.split_n = split_n
+        self.full_split = full_split
+        if self.full_split:
+            self.data_dir = data_dir+"/full_split_"
+        self.data_dir = data_dir+"/split_"
 
-# Get dataset of data split
-def get_splits(split_n):
-    '''
-
-    '''
-    path = './data/split_'+str(split_n)+'/split_'+str(split_n)+"_"
-    train_df = pd.read_csv(path+'train.csv')
-    val_df = pd.read_csv(path+'val.csv')
-
-    return train_df, val_df
-
-# Read and store images
-def image_reader(dataframe):
-    '''
-    '''
-    image_dict = {}
-    file_locations = list(dataframe['image_id'])
-    labels = list(dataframe['label'])
-    category_0 = []
-    category_1 = []
-    for i in range(len(file_locations)):
-        image = cv2.imread(file_locations[i], cv2.COLOR_RGB2BGR)
-        try:
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        except: # if the image is gray
-            image = cv2.cvtColor(image,cv2.COLOR_GRAY2RGB)
+    def get_splits(self, split_n):
+        '''
+        Receives the number of the split split_n and outputs the training and validation
+        pandas dataframes.
+        '''
+        if self.full_split:
+            path = self.data_dir+str(split_n)+'/full_split_'+str(split_n)+"_"
+        else:
+            path = self.data_dir+str(split_n)+'/split_'+str(split_n)+"_"
         
-        if labels[i] == 0:
-            category_0.append(image)
-        else:
-            category_1.append(image)
+        train_df = pd.read_csv(path+'train.csv')
+        val_df = pd.read_csv(path+'val.csv')
 
-    image_dict[0] = category_0
-    image_dict[1] = category_1
+        return train_df, val_df
 
-    return image_dict
+    def image_reader(self, dataframe):
+        '''
+        Receives the dataframe that points to the images, and outputs a dictionnary 
+        with all images loaded with OpenCV.
+        '''
+        image_dict = {}
+        file_locations = list(dataframe['image_id'])
+        labels = list(dataframe['label'])
+        category_0 = []
+        category_1 = []
+        for i in range(len(file_locations)):
+            image = cv2.imread(file_locations[i], cv2.COLOR_RGB2BGR)
+            try:
+                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            except: # if the image is gray
+                image = cv2.cvtColor(image,cv2.COLOR_GRAY2RGB)
+            
+            if labels[i] == 0:
+                category_0.append(image)
+            else:
+                category_1.append(image)
 
-# Get SIFT features and descriptors
-def sift_features(images):
-    '''
-    Creates descriptors using sift. Takes one parameter that is images dictionary. Return an array whose first 
-    index holds the decriptor_list without an order and the second index holds the sift_vectors dictionary which
-    holds the descriptors but this is seperated class by class.
-    '''
-    sift_vectors = {}
-    descriptor_list = []
-    sift = cv2.xfeatures2d.SIFT_create()
-    for key,value in tqdm(images.items()):
-        features = []
-        for img in tqdm(value):
-            kp, des = sift.detectAndCompute(img,None)
-            descriptor_list.extend(des) #dico
-            features.append(des)
-        sift_vectors[key] = features
+        image_dict[0] = category_0
+        image_dict[1] = category_1
 
-    return descriptor_list, sift_vectors
-
-# Perform kmeans clustering on descriptors
-def kmeans(k, descriptor_list):
-    '''
-    A k-means clustering algorithm who takes 2 parameter which is number 
-    of cluster(k) and the other is descriptors list(unordered 1d array)
-    Returns an array that holds central points.
-    '''
-    kmeans = KMeans(n_clusters = k, n_init=10, verbose=1)
-    kmeans.fit(descriptor_list)
-    vwords = kmeans.cluster_centers_
-
-    return kmeans, vwords
-
-# Find index helper function
-def find_index(image, center):
-    count = 0
-    ind = 0
-    for i in range(len(center)):
-        if(i == 0):
-           count = distance.euclidean(image, center[i]) 
-        else:
-            dist = distance.euclidean(image, center[i]) 
-            if(dist < count):
-                ind = i
-                count = dist
-    return ind
-
-# Extract visual words from descriptors  
-def get_histograms(sift_vectors, centers):
-    '''
-    '''    
-    dict_feature = {}
-    for key,value in sift_vectors.items():
-        category = []
-        for img in value:
-            histogram = np.zeros(len(centers))
-            for each_feature in img:
-                ind = find_index(each_feature, centers)
-                histogram[ind] += 1
-            category.append(histogram)
-        dict_feature[key] = category
-    return dict_feature
-
-# Initialize SVM classifier
-def train_svm(visual_words, labels, c, kernel):
-    # Get training data
-    X_train = visual_words
-    Y_train = labels
-
-    # Initialize SVM classifier
-    svc_classifier = SVC(C=c, kernel=kernel, gamma="auto")
-    svc_classifier.fit(X_train, Y_train)
+        return image_dict
     
-    return svc_classifier
+    def sift_features(self, images):
+        '''
+        Creates descriptors using sift. Takes one parameter that is images dictionary. Return an array whose first 
+        index holds the decriptor_list without an order and the second index holds the sift_vectors dictionary which
+        holds the descriptors but this is seperated class by class.
+        '''
+        sift_vectors = {}
+        descriptor_list = []
+        sift = cv2.xfeatures2d.SIFT_create()
+        for key,value in images.items():
+            features = []
+            for img in tqdm(value):
+                kp, des = sift.detectAndCompute(img,None)
+                descriptor_list.extend(des)
+                features.append(des)
+            sift_vectors[key] = features
+
+        return descriptor_list, sift_vectors
+    
+    def kmeans(self, k, descriptor_list):
+        '''
+        A k-means clustering algorithm who takes 2 parameter which is number 
+        of cluster(k) and the other is descriptors list(unordered 1d array)
+        Returns an array that holds central points.
+        '''
+        kmeans = KMeans(n_clusters = k, n_init=10, verbose=0)
+        kmeans.fit(descriptor_list)
+        vwords = kmeans.cluster_centers_
+
+        return kmeans, vwords
+
+    def find_index(self, image, center):
+        '''
+        Receives an image and a cluster center and returns to which image does the center belong
+        as and index
+        '''
+        count = 0
+        ind = 0
+        for i in range(len(center)):
+            if(i == 0):
+                count = distance.euclidean(image, center[i]) 
+            else:
+                dist = distance.euclidean(image, center[i]) 
+                if(dist < count):
+                    ind = i
+                    count = dist
+        return ind
+
+    # Extract visual words from descriptors  
+    def get_histograms_dictio(self, sift_vectors, kmeans_centers):
+        '''
+        Receives the keypoints and the cluster centers and returns 
+        a dictionary with all the histograms, divided by class
+        '''    
+        dict_feature = {}
+        for key,value in sift_vectors.items():
+            print(f"Getting histograms of class {key}...")
+            category = []
+            for img in tqdm(value):
+                histogram = np.zeros(len(kmeans_centers))
+                for each_feature in img:
+                    ind = self.find_index(each_feature, kmeans_centers)
+                    histogram[ind] += 1
+                category.append(histogram)
+            dict_feature[key] = category
+        return dict_feature
+
+    # Map dictionary of histograms to np arrays
+    def get_histogram_arrays(self, sift_vectors, kmeans_centers):
+        '''
+        Receives the keypoints and cluster centers and returns the np.array of the
+        training data and the training labels
+        '''
+        histogram_dictio = self.get_histograms_dictio(sift_vectors, kmeans_centers)
+        X = []
+        Y = []
+        print("Converting to np.arrays...")
+        for key in histogram_dictio.keys():
+            for value in histogram_dictio[key]:
+                X.append(value)
+                Y.append(key)
+        
+        return np.array(X), np.array(Y)
+
+    def get_all_histograms(self, K_clusters=20):
+        '''
+        Receives the number of clusters to perform kmeans on the data, and returns nothing
+        but outputs a .npy file with the training and validation histograms for the current
+        data split
+        '''
+        # Get split data
+        print('Convert dataframe to dictionary of images')
+        split_n = self.split_n
+        train_splits, val_splits = self.get_splits(split_n)
+
+        # Get split images
+        print('Get split 1 data')
+        train_dict = self.image_reader(train_splits)
+        val_dict = self.image_reader(val_splits)
+
+        # Get descriptors and keypoints from split
+        print('Get full sift features for training data')
+        train_descriptor_list, train_sift_vectors = self.sift_features(train_dict)
+        print('Get full sift features for validation data...')
+        val_descriptor_list, val_sift_vectors = self.sift_features(val_dict)
+
+        # Perform kmeans training to get visual words
+        K = K_clusters
+        print('Perform clustering on training data...')
+        train_k_means, train_centers = self.kmeans(K_clusters, train_descriptor_list)
+        print('Perform clustering on validation data...')
+        val_k_means, valid_centers = self.kmeans(K_clusters, val_descriptor_list)
+
+        # Get histograms and save them
+        print("Get histograms from kmeans clustering")
+        train_histograms, train_classes = self.get_histogram_arrays(train_sift_vectors, train_centers)
+        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/train_visual_words_k_"+str(K_clusters)+".npy", train_histograms)
+        np.save("output/bovw/split_"+str(self.split_n)+"/classes/train_classes_k_"+str(K_clusters)+".npy", train_classes)
+        print("Get validation histograms from kmeans clustering")
+        val_histograms, val_classes = self.get_histogram_arrays(val_sift_vectors, valid_centers)
+        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/val_visual_words_k_"+str(K_clusters)+".npy", val_histograms)
+        np.save("output/bovw/split_"+str(self.split_n)+"/classes/val_classes_k_"+str(K_clusters)+".npy", val_classes)
 
 
-if __name__ == '__main__':
-    K = 20
-    # Convert dataframe to dictionary of images
-    print('Convert dataframe to dictionary of images')
-    split_n = 1
-    train_splits, val_splits = get_splits(split_n)
-
-    # Get split 1 data
-    print('Get split 1 data')
-    train_dict = image_reader(train_splits)
-    val_dict = image_reader(val_splits)
-
-    # Get full sift features for training data
-    print('Get full sift features for training data...')
-    train_descriptor_list, train_sift_vectors = sift_features(train_dict)
-    print('Get full sift features for validation data...')
-    val_descriptor_list, val_sift_vectors = sift_features(val_dict)
-
-    # Perform kmeans training to get visual words
-    print('Perform clustering on training data...')
-    train_k_means, train_centers = kmeans(K, train_descriptor_list)
-    print('Perform clustering on validation data...')
-    val_k_means, valid_centers = kmeans(K, val_descriptor_list)
-
-    # Get visual words
-    print("Get training histograms from kmeans clustering")
-    train_histograms, train_classes = get_histograms(train_dict, K, train_k_means)
-    np.save('output/bovw/train_visual_words.npy', train_histograms)
-    np.save('output/bovw/train_classes.npy', train_classes)
-
-    print("Get validation histograms from kmeans clustering")
-    val_histograms, val_classes = get_histograms(val_dict, K, val_k_means)
-    np.save('output/bovw/val_visual_words.npy', val_histograms)
-    np.save('output/bovw/val_classes.npy', val_classes)
-
-    # Load data
-    train_histograms = np.load('output/bovw/train_visual_words.npy')
-    train_classes = np.load('output/bovw/train_classes.npy')
-    val_histograms = np.load('output/bovw/val_visual_words.npy')
-    val_classes = np.load('output/bovw/val_classes.npy')
-
-    # Train SVM classifier
-    print("Train SVM classifier")
-    c_values = [2] #, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9]
-    kernels = ['poly', 'rbf']
-    for c in c_values:
-        for kernel in kernels:
-            svm_classifier = train_svm(train_histograms, train_classes, c, kernel)
-
-            print("---\tC: {};\tKernel: {}\t---".format(c, kernel))
-            print("\tTraining accuracy:\t", svm_classifier.score(train_histograms, train_classes))
-            print("\tValidation accuracy:\t", svm_classifier.score(val_histograms, val_classes))
 
