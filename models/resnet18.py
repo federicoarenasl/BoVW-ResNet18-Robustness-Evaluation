@@ -19,13 +19,14 @@ INPUT_SIZE = 224
 
 class ResNet18:
     def __init__(self, on_split, input_data_dir = "./data",
-                 output_dir = "./output/resnet18/",
+                 output_dir = "./output/resnet18",
                  batch_size = 50, 
                  num_epochs = 50,
                  num_classes = 2,
                  training = True,
                  pretrained_model = None,
-                 feature_extract = True
+                 feature_extract = True,
+                 full_split = False
                  ):
         '''
         The ResNet18 class gets the data directory as input, as well as the hyperparameters for
@@ -33,7 +34,7 @@ class ResNet18:
         '''
         # Initialize global variables
         self.data_dir = input_data_dir+"/split_"+str(on_split)+"/"
-        self.output_dir = output_dir+"split_"+str(on_split)+"/"
+        self.output_dir = output_dir+"/split_"+str(on_split)+"/"
         self.training = training
         self.num_classes = num_classes
         self.batch_size = batch_size
