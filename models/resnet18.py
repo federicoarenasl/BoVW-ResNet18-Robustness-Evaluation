@@ -12,7 +12,8 @@ import matplotlib.pyplot as plt
 import time 
 import os 
 import copy 
-from tqdm import tqdm
+from tqdm.notebook import tqdm
+#from tqdm import tqdm
 
 # Define input feature map size
 INPUT_SIZE = 224
@@ -26,7 +27,8 @@ class ResNet18:
                  training = True,
                  pretrained_model = None,
                  feature_extract = True,
-                 full_split = False
+                 full_split = False,
+                 perturbation = ""
                  ):
         '''
         The ResNet18 class gets the data directory as input, as well as the hyperparameters for
@@ -264,6 +266,8 @@ class ResNet18:
             df_name = root_output_dir+"progress/test_progress.csv"
             print(f"Outputting data to {df_name}...")
             pd.DataFrame.from_dict(training_output).to_csv(df_name, index=False)
+
+            return best_acc
 
 
 #----------------------------------------------------------------------------------------------
