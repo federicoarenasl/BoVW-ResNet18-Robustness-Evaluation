@@ -17,6 +17,7 @@ def train_hyperparameters():
             resnet.run(lr=lr, hyp_name=lr_name)
     
 def test_splits():
+    # Training on lr=0.01 for all full splits
     for split in range(1, 4):
         print(f"#####  On split {split} ######")
         # Instantiate network
