@@ -33,8 +33,13 @@ class ResNet18:
         training, and outputs the training progress and the trained model as a .pth file.
         '''
         # Initialize global variables
-        self.data_dir = input_data_dir+"/split_"+str(on_split)+"/"
-        self.output_dir = output_dir+"/split_"+str(on_split)+"/"
+        self.full_split = full_split
+        if self.full_split:
+            self.data_dir = input_data_dir+"/full_split_"+str(on_split)+"/"
+            self.output_dir = output_dir+"/full_split_"+str(on_split)+"/"
+        else:
+            self.data_dir = input_data_dir+"/split_"+str(on_split)+"/"
+            self.output_dir = output_dir+"/split_"+str(on_split)+"/"
         self.training = training
         self.num_classes = num_classes
         self.batch_size = batch_size
