@@ -9,3 +9,4 @@ output/bovw/train_sift_vectors.npy
 .ipynb_checkpoints/
 *.pth
 *.png
+.vscode/
