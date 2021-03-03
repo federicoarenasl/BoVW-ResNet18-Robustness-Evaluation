@@ -20,7 +20,7 @@ def test_splits():
     for split in range(1, 4):
         print(f"#####  On split {split} ######")
         # Instantiate network
-        resnet = ResNet18(split, "./data", "./output/resnet18/", 
+        resnet = ResNet18(split, "./data", "./output/resnet18", 
                             batch_size=50, num_epochs=50, 
                             num_classes=2, training=True, pretrained_model=None, feature_extract=True, full_split=True)
 
