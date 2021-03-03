@@ -158,40 +158,29 @@ class Noises:
         return image
     
 class PerturbImages:
-    def __init__(self, source_path):
-        self.source_path = source_path
+    def __init__(self, source_path="./data/full_split_"):
+        self.source_path = source_path # Path for images, add number according to split
+        self.robust_path = "./data/robustness"
     
-    def create_dir(self, file_path):
-        
-    def create_dirs(self,):
+    def create_dir(self, directory):
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+    def create_placeholder_dirs(self,):
         # Create root directory
-        create_dir(root_dir)
-        
-        for split_name in split_names:
-            # Create split directory
-            create_dir(root_dir+split_name)
+        self.create_dir(self.robust_path)
+        perturb_ids = list(range(1,10))
+        perturb_levels = list(range(1,11))
+        splits = list(range(1,4))
+        classes = ['cat', 'dog']
+        for perturb_id in tqdm(perturb_ids):
+            for perturb_level in perturb_levels:
+                for split in splits:
+                    for class_ in classes:
+                        # Create perturbation id folder
+                        full_path = '/5_'+str(perturb_id)+'/'+str(perturb_level)+'/full_split_'+str(split)+'/val/'+class_
+                        self.create_dir(full_path)
 
-            # Create full_split directory
-            create_dir(root_dir+'full_'+split_name)
-            
-            # Create train directory for the current split
-            create_dir(root_dir+split_name+'/train/')
-            # Create validation directory for the current split
-            create_dir(root_dir+split_name+'/val/')
-            # Create test directory for the current split
-            create_dir(root_dir+split_name+'/test/')
 
-            # Create train directory for the current full_split
-            create_dir(root_dir+'full_'+split_name+'/train/')
-            # Create validation directory for the current split
-            create_dir(root_dir+'full_'+split_name+'/val/')
-
-            for c in classes:
-                # Create class directories for the current split
-                create_dir(root_dir+split_name+'/train/'+c+'/')
-                create_dir(root_dir+split_name+'/val/'+c+'/')
-                create_dir(root_dir+split_name+'/test/'+c+'/')
-
-                # Create class directories for the current full_split
-                create_dir(root_dir+'full_'+split_name+'/train/'+c+'/')
-                create_dir(root_dir+'full_'+split_name+'/val/'+c+'/')
+if __name__ == "__main__":
+    # Create robustness folder placeholder
