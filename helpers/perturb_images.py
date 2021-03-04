@@ -96,35 +96,24 @@ class Noises:
         Takes an image as input and a standard deviation and returns an image with
         it's hue noise increased
         '''
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-        n_rows, n_columns, n_channels = image.shape
-        for row in range(n_rows):
-            for column in range(n_columns):
-                image[row][column][channel] += normal(loc=0, scale=std) * 255
-                if image[row][column][channel] < 0:
-                    image[row][column][channel] = 0
-                elif image[row][column][channel] > 255:
-                    image[row][column][channel] -= 255
-        image = cv2.cvtColor(image, cv2.COLOR_HSV2RGB)
-        
-        return image
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        hue_noise = normal(0, std, image.shape[:-1])*255
+        image[:,:,0] = image[:,:,0] + hue_noise
+        image = np.clip(image, 0, 255)
+        hued_image = cv2.cvtColor(image, cv2.COLOR_HSV2BGR)
+        return hued_image
 
     def increase_saturation_noise(self,image, std):
         '''
         Receives an image as input and outputs the same image with increased 
         saturation
         '''
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-        n_rows, n_columns, n_channels = image.shape
-        for row in range(n_rows):
-            for column in range(n_columns):
-                image[row][column][channel] += normal(loc=0, scale=std) * 255
-                if image[row][column][channel] < 0:
-                    image[row][column][channel] = 0
-                elif image[row][column][channel] > 255:
-                    image[row][column][channel] = 255
-        image = cv2.cvtColor(image, cv2.COLOR_HSV2RGB)
-        return image
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        sat_noise = normal(0, std, image.shape[:-1])*255
+        image[:,:,1] = image[:,:,1] + sat_noise
+        image = np.clip(image, 0, 255)
+        sat_image = cv2.cvtColor(image, cv2.COLOR_HSV2BGR)
+        return sat_image
 
     def image_occlusion(self,image, edge, print_center=False):
         '''
@@ -213,8 +202,13 @@ class PerturbImages(Noises):
                 # Decrease brightness 
                 #self.add_all_decrease_brightness(original_image, "5_6", split, curr_class, image_name)
                 #print(f"Done with image {im_path}...")
+                # Add hue noises
+                #self.add_all_hue_noises(original_image, "5_7", split, curr_class, image_name)
+                #print(f"Done with image {im_path}...")
+                # Add sat noises
+                self.add_all_sat_noises(original_image, "5_8", split, curr_class, image_name)
                 # Add occlusions
-                self.add_all_image_occlusions(original_image, "5_9", split, curr_class, image_name)
+                #self.add_all_image_occlusions(original_image, "5_9", split, curr_class, image_name)
 
     def add_all_gaussian_noise(self, original_image,  id_path, split, curr_class, image_name):
         self.stds = np.arange(0, 19, 2)
@@ -312,6 +306,42 @@ class PerturbImages(Noises):
                 print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
     
+    def add_all_hue_noises(self, original_image,  id_path, split, curr_class, image_name):
+        stds = np.arange(0.0, 0.19, .02)
+        for l,std in enumerate(stds):
+            image = np.array(original_image).copy()
+            print(f"Standard deviation: {std}")
+            image = self.increase_hue_noise(image, std)
+            if curr_class == 'dog':
+                new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/dog/"+image_name
+                cv2.imwrite(new_im_path,image)
+                print(f"Saving image to {new_im_path}")
+                #copyfile(old_path, new_im_path)
+            else:
+                new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/cat/"+image_name
+                cv2.imwrite(new_im_path,image)
+                print(f"Saving image to {new_im_path}")
+                #copyfile(old_path, new_im_path)
+                #
+
+    def add_all_sat_noises(self, original_image,  id_path, split, curr_class, image_name):
+        stds = np.arange(0.0, 0.19, .02)
+        for l,std in enumerate(stds):
+            image = np.array(original_image).copy()
+            #print(f"Standard deviation: {std}")
+            image = self.increase_saturation_noise(image, std)
+            if curr_class == 'dog':
+                new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/dog/"+image_name
+                cv2.imwrite(new_im_path,image)
+                print(f"Saving image to {new_im_path}")
+                #copyfile(old_path, new_im_path)
+            else:
+                new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/cat/"+image_name
+                cv2.imwrite(new_im_path,image)
+                print(f"Saving image to {new_im_path}")
+                #copyfile(old_path, new_im_path)
+                #
+
     def add_all_image_occlusions(self, original_image,  id_path, split, curr_class, image_name):
         edges = np.arange(0, 50, 5)
         for l,edge in enumerate(edges):
