@@ -327,6 +327,7 @@ class PerturbImages(Noises):
                 cv2.imwrite(new_im_path,image)
                 print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
+                #
 
 if __name__ == "__main__":
     # Create robustness folder placeholder
