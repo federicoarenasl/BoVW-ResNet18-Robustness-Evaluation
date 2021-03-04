@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 def retreive_histograms():
     # Define number of clusters and split to go through
-    clusters = [150, 175, 200]
+    clusters = [50, 100, 150, 200, 250, 300]
     splits = [1,2,3]
 
     for split in tqdm(splits):
@@ -13,9 +13,59 @@ def retreive_histograms():
             print(f"On cluster {cluster}...")
             # Initialize BovW model
             bovw = BovW(split, "./data")
-
             # Get all histograms for all clusters
             bovw.get_all_histograms(cluster)
+
+def retrieve_accuracies():
+    # Define hyperparameter's value range
+    c_range =np.arange(0.5, 100.5, 0.5)
+    clusters = [50, 100, 150, 200, 250, 300]
+    kernels = ['linear', 'poly', 'rbf']
+    # Run through splits and clusters
+    for split in range(1,4):
+        # Loop through kernels
+        for k in kernels:
+            # Define place holder for accuracie values
+            df_train_dict = {}
+            df_val_dict = {}
+            # Loop through clusters
+            for cluster in cluster:
+                # Load data
+                train_histograms = np.load("output/bovw/split_"+str(split)+"/histograms/train/train_visual_words_k_"+str(cluster)+".npy")
+                train_classes = np.load("output/bovw/split_"+str(split)+"/histograms/train/train_classes_k_"+str(cluster)+".npy")
+                val_histograms = np.load("output/bovw/split_"+str(split)+"/histograms/val/val_visual_words_k_"+str(cluster)+".npy")
+                val_classes = np.load("output/bovw/split_"+str(split)+"/histograms/val/val_classes_k_"+str(cluster)+".npy")
+                # Cluster accuracies
+                train_accuracies = []
+                val_accuracies = []
+                # Loop through c values
+                c_vals = []
+                for c in c_range:
+                    c_vals.append(c)
+                    # Get SVM classifier
+                    bovw = BovW(split, "./data")
+                    svm_classifier = bovw.train_svm(train_histograms, train_classes, c, k)
+                    # Get train and val accuracies
+                    train_acc = svm_classifier.score(train_histograms, train_classes)
+                    val_acc = svm_classifier.score(val_histograms, val_classes)
+                    # Append accuracy values
+                    train_accuracies.append(train_acc)
+                    val_accuracies.append(val_acc)
+
+                # Store accuracies in dictionary
+                df_train_dict['c'] = c_vals
+                df_train_dict[str(cluster)] = train_accuracies
+                df_val_dict['c'] = c_vals
+                df_val_dict[str(cluster)] = val_accuracies
+            
+            # Store dataframes
+            df_train = pd.DataFrame.from_dict(df_train_dict) 
+            df_val = pd.DataFrame.from_dict(df_val_dict)
+
+            # Save dataframes
+            df_train.to_csv("./output/bovw/split_"+str(split)+"/svm_results/train_acc_"+str(k)+".csv")
+            df_val.to_csv("./output/bovw/split_"+str(split)+"/svm_results/val_acc_"+str(k)+".csv")
+
 
 if __name__=="__main__":
     retreive_histograms()

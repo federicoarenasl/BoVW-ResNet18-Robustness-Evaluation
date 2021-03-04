@@ -11,12 +11,14 @@ from sklearn.utils import shuffle
 from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from scipy.spatial import distance
 from tqdm import tqdm
 
 # Define BovW class
 class BovW:
     def __init__(self, split_n, data_dir, full_split = False):
+        '''
+        This class defines the Bag of Visual Words model
+        '''
         self.split_n = split_n
         self.full_split = full_split
         if self.full_split:
@@ -74,7 +76,7 @@ class BovW:
         sift_vectors = {}
         descriptor_list = []
         sift = cv2.xfeatures2d.SIFT_create()
-        for key,value in images.items():
+        for key,value in tqdm(images.items()):
             features = []
             for img in tqdm(value):
                 kp, des = sift.detectAndCompute(img,None)
@@ -148,6 +150,21 @@ class BovW:
                 Y.append(key)
         
         return np.array(X), np.array(Y)
+    
+    def train_svm(self, visual_words, labels, c, k_):
+        '''
+        Takes the visual words, the labels, the complexity ter c, and the type of 
+        kernel and outputs a trained svm classifier
+        '''
+        # Get training data
+        X_train = visual_words
+        Y_train = labels
+
+        # Initialize SVM classifier
+        svc_classifier = make_pipeline(StandardScaler(), SVC(C=c, kernel=k_, gamma='auto'))
+        svc_classifier.fit(X_train, Y_train)
+        
+        return svc_classifier
 
     def get_all_histograms(self, K_clusters=20):
         '''
@@ -175,18 +192,16 @@ class BovW:
         K = K_clusters
         print('Perform clustering on training data...')
         train_k_means, train_centers = self.kmeans(K_clusters, train_descriptor_list)
-        print('Perform clustering on validation data...')
-        val_k_means, valid_centers = self.kmeans(K_clusters, val_descriptor_list)
 
         # Get histograms and save them
         print("Get histograms from kmeans clustering")
         train_histograms, train_classes = self.get_histogram_arrays(train_sift_vectors, train_centers)
-        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/train_visual_words_k_"+str(K_clusters)+".npy", train_histograms)
-        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/train_classes_k_"+str(K_clusters)+".npy", train_classes)
+        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/train/train_visual_words_k_"+str(K_clusters)+".npy", train_histograms)
+        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/train/train_classes_k_"+str(K_clusters)+".npy", train_classes)
         print("Get validation histograms from kmeans clustering")
-        val_histograms, val_classes = self.get_histogram_arrays(val_sift_vectors, valid_centers)
-        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/val_visual_words_k_"+str(K_clusters)+".npy", val_histograms)
-        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/val_classes_k_"+str(K_clusters)+".npy", val_classes)
+        val_histograms, val_classes = self.get_histogram_arrays(val_sift_vectors, train_centers)
+        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/val/val_visual_words_k_"+str(K_clusters)+".npy", val_histograms)
+        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/val/val_classes_k_"+str(K_clusters)+".npy", val_classes)
 
 
 
