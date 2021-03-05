@@ -4,11 +4,16 @@ from tqdm import tqdm
 
 def retreive_histograms():
     # Define number of clusters and split to go through
-    clusters = [50, 100, 150, 200, 250, 300]
+    clusters = [50, 100, 150, 200, 250]
     splits = [1,2,3]
 
     for split in tqdm(splits):
         print(f"Retreiving histograms from Split {split}...")
+        if split == 1:
+            bovw = BovW(split, "./data")
+            # Get all histograms for all clusters
+            bovw.get_all_histograms(300)
+            continue
         for cluster in clusters:
             print(f"On cluster {cluster}...")
             # Initialize BovW model
