@@ -4,22 +4,26 @@ from tqdm import tqdm
 
 def retreive_histograms():
     # Define number of clusters and split to go through
-    clusters = [50, 100, 150, 200, 250]
+    clusters = [50, 100, 150, 200, 250, 300]
     splits = [1,2,3]
 
     for split in tqdm(splits):
         print(f"Retreiving histograms from Split {split}...")
+        bovw = BovW(split, "./data")
+        print("Getting data...")
+        train_dict, val_dict = bovw.get_train_val_dict(split)
         if split == 1:
-            bovw = BovW(split, "./data")
-            # Get all histograms for all clusters
-            bovw.get_all_histograms(300)
+            print("On left overs from split 1...")
+            for c in [250]:
+                print("On left overs from Split 1, cluser", c)
+                # Get all histograms for all clusters
+                bovw.get_all_histograms(c, train_dict, val_dict)
             continue
         for cluster in clusters:
             print(f"On cluster {cluster}...")
             # Initialize BovW model
-            bovw = BovW(split, "./data")
             # Get all histograms for all clusters
-            bovw.get_all_histograms(cluster)
+            bovw.get_all_histograms(cluster, train_dict, val_dict)
 
 def retrieve_accuracies():
     # Define hyperparameter's value range

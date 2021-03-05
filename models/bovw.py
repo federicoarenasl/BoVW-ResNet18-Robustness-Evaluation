@@ -76,9 +76,9 @@ class BovW:
         sift_vectors = {}
         descriptor_list = []
         sift = cv2.xfeatures2d.SIFT_create()
-        for key,value in tqdm(images.items()):
+        for key,value in images.items():
             features = []
-            for img in tqdm(value):
+            for img in value:
                 kp, des = sift.detectAndCompute(img,None)
                 descriptor_list.extend(des)
                 features.append(des)
@@ -125,7 +125,7 @@ class BovW:
         for key,value in sift_vectors.items():
             print(f"Getting histograms of class {key}...")
             category = []
-            for img in tqdm(value):
+            for img in value:
                 histogram = np.zeros(len(kmeans_centers))
                 for each_feature in img:
                     ind = self.find_index(each_feature, kmeans_centers)
@@ -166,22 +166,26 @@ class BovW:
         
         return svc_classifier
 
-    def get_all_histograms(self, K_clusters=20):
-        '''
-        Receives the number of clusters to perform kmeans on the data, and returns nothing
-        but outputs a .npy file with the training and validation histograms for the current
-        data split
-        '''
+    def get_train_val_dict(self, split_n):
         # Get split data
         print('Convert dataframe to dictionary of images')
         split_n = self.split_n
         train_splits, val_splits = self.get_splits(split_n)
 
         # Get split images
-        print('Get split 1 data')
+        print(f'Get split {split_n} data')
         train_dict = self.image_reader(train_splits)
         val_dict = self.image_reader(val_splits)
 
+        return train_dict, val_dict
+
+
+    def get_all_histograms(self, K_clusters, train_dict, val_dict):
+        '''
+        Receives the number of clusters to perform kmeans on the data, and returns nothing
+        but outputs a .npy file with the training and validation histograms for the current
+        data split
+        '''
         # Get descriptors and keypoints from split
         print('Get full sift features for training data')
         train_descriptor_list, train_sift_vectors = self.sift_features(train_dict)

@@ -362,4 +362,5 @@ class PerturbImages(Noises):
 if __name__ == "__main__":
     # Create robustness folder placeholder
     perturbimages = PerturbImages()
+    perturbimages.create_placeholder_dirs()
     perturbimages.perform_perturbations()
