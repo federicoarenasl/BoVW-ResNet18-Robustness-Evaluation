@@ -74,7 +74,7 @@ def evaluate_robustness():
         pretrained = torch.load("./output/resnet18/full_split_"+str(split)+"/weights/trained_model.pth")
         # Instantiate network
         if split == 3:
-            perturbations = perturb_ids[8:]
+            perturbations = [3]
         else:
             perturbations = perturb_ids
         for perturb_id in perturbations:

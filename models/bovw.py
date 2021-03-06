@@ -23,7 +23,8 @@ class BovW:
         self.full_split = full_split
         if self.full_split:
             self.data_dir = data_dir+"/full_split_"
-        self.data_dir = data_dir+"/split_"
+        else:
+            self.data_dir = data_dir+"/split_"
 
     def get_splits(self, split_n):
         '''
@@ -200,12 +201,18 @@ class BovW:
         # Get histograms and save them
         print("Get histograms from kmeans clustering")
         train_histograms, train_classes = self.get_histogram_arrays(train_sift_vectors, train_centers)
-        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/train/train_visual_words_k_"+str(K_clusters)+".npy", train_histograms)
-        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/train/train_classes_k_"+str(K_clusters)+".npy", train_classes)
         print("Get validation histograms from kmeans clustering")
         val_histograms, val_classes = self.get_histogram_arrays(val_sift_vectors, train_centers)
-        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/val/val_visual_words_k_"+str(K_clusters)+".npy", val_histograms)
-        np.save("output/bovw/split_"+str(self.split_n)+"/histograms/val/val_classes_k_"+str(K_clusters)+".npy", val_classes)
+        if not self.full_split:
+            np.save("output/bovw/split_"+str(self.split_n)+"/histograms/train/train_visual_words_k_"+str(K_clusters)+".npy", train_histograms)
+            np.save("output/bovw/split_"+str(self.split_n)+"/histograms/train/train_classes_k_"+str(K_clusters)+".npy", train_classes)
+            np.save("output/bovw/split_"+str(self.split_n)+"/histograms/val/val_visual_words_k_"+str(K_clusters)+".npy", val_histograms)
+            np.save("output/bovw/split_"+str(self.split_n)+"/histograms/val/val_classes_k_"+str(K_clusters)+".npy", val_classes)
 
+        else:
+            np.save("output/bovw/full_split_"+str(self.split_n)+"/histograms/train/train_visual_words_k_"+str(K_clusters)+".npy", train_histograms)
+            np.save("output/bovw/full_split_"+str(self.split_n)+"/histograms/train/train_classes_k_"+str(K_clusters)+".npy", train_classes)
+            np.save("output/bovw/full_split_"+str(self.split_n)+"/histograms/val/val_visual_words_k_"+str(K_clusters)+".npy", val_histograms)
+            np.save("output/bovw/full_split_"+str(self.split_n)+"/histograms/val/val_classes_k_"+str(K_clusters)+".npy", val_classes)
 
 

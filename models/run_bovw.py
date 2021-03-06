@@ -75,6 +75,17 @@ def retrieve_accuracies():
             df_train.to_csv("./output/bovw/split_"+str(split)+"/svm_results/train_acc_"+str(k)+".csv")
             df_val.to_csv("./output/bovw/split_"+str(split)+"/svm_results/val_acc_"+str(k)+".csv")
 
+def train_full_splits(best_cluster_n):
+    # Define number of clusters and split to go through
+    splits = [1,2,3]
+
+    for split in tqdm(splits):
+        print(f"Retreiving histograms from Split {split}...")
+        bovw = BovW(split, "./data", full_split=True)
+        print("Getting data...")
+        train_dict, val_dict = bovw.get_train_val_dict(split)
+        print("Getting histograms...")
+        bovw.get_all_histograms(best_cluster_n, train_dict, val_dict)
 
 if __name__=="__main__":
-    retrieve_accuracies()
+    train_full_splits(250)
