@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 import time 
 import os 
 import copy 
-from tqdm.notebook import tqdm
-#from tqdm import tqdm
+#from tqdm.notebook import tqdm
+from tqdm import tqdm
 
 # Define input feature map size
 INPUT_SIZE = 224
@@ -100,11 +100,16 @@ class ResNet18:
             ]),
         }
 
-        # Create training and validation datasets
-        image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
-
-        # Create training and validation dataloaders
-        loader = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=bs, shuffle=True, num_workers=4) for x in ['train', 'val']}
+        if self.training:
+            # Create training and validation datasets
+            image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
+            # Create training and validation dataloaders
+            loader = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=bs, shuffle=True, num_workers=4) for x in ['train', 'val']}
+        else:
+            # Create training and validation datasets
+            image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['val']}
+            # Create training and validation dataloaders
+            loader = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=bs, shuffle=True, num_workers=4) for x in ['val']}
 
         return loader
 
@@ -127,7 +132,7 @@ class ResNet18:
         best_acc = 0.0
         
         # Loop through epochs to start training
-        for epoch in tqdm(range(num_epochs)):
+        for epoch in range(num_epochs):
             print('Epoch {}/{}'.format(epoch, num_epochs -1))
             print('-'*10)
 
@@ -148,6 +153,7 @@ class ResNet18:
 
                 # Iterate over data.
                 print(phases[phase])
+                print(f"Looking at data in {self.data_dir}")
                 for inputs, labels in tqdm(dataloaders[phase]):
                     inputs = inputs.to(device)
                     labels = labels.to(device)
@@ -192,7 +198,7 @@ class ResNet18:
         # Calculate total training time
         time_elapsed = time.time() - since
         print('\nTraining complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
-        print('Best val Acc: {:4f}'.format(best_acc))
+        #print('Best val Acc: {:4f}'.format(best_acc))
 
         # load best model weights
         model.load_state_dict(best_model_wts)
@@ -264,9 +270,9 @@ class ResNet18:
             training_output['best_acc'] = [best_acc]*self.num_epochs
             training_output['runtime(s)'] = [time_elapsed]*self.num_epochs
             df_name = root_output_dir+"progress/test_progress.csv"
-            print(f"Outputting data to {df_name}...")
-            pd.DataFrame.from_dict(training_output).to_csv(df_name, index=False)
-
+            #print(f"Outputting data to {df_name}...")
+            #pd.DataFrame.from_dict(training_output).to_csv(df_name, index=False)
+            print(f"Test accuracy of {best_acc}")
             return best_acc
 
 

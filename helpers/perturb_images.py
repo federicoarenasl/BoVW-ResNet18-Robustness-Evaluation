@@ -206,9 +206,9 @@ class PerturbImages(Noises):
                 #self.add_all_hue_noises(original_image, "5_7", split, curr_class, image_name)
                 #print(f"Done with image {im_path}...")
                 # Add sat noises
-                self.add_all_sat_noises(original_image, "5_8", split, curr_class, image_name)
+                #self.add_all_sat_noises(original_image, "5_8", split, curr_class, image_name)
                 # Add occlusions
-                #self.add_all_image_occlusions(original_image, "5_9", split, curr_class, image_name)
+                self.add_all_image_occlusions(original_image, "5_9", split, curr_class, image_name)
 
     def add_all_gaussian_noise(self, original_image,  id_path, split, curr_class, image_name):
         self.stds = np.arange(0, 19, 2)
@@ -250,12 +250,12 @@ class PerturbImages(Noises):
             if curr_class == 'dog':
                 new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/dog/"+image_name
                 cv2.imwrite(new_im_path,image)
-                print(f"Saving image to {new_im_path}")
+                #print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
             else:
                 new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/cat/"+image_name
                 cv2.imwrite(new_im_path,image)
-                print(f"Saving image to {new_im_path}")
+                #print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
                 
     def add_all_decrease_contrast(self, original_image,  id_path, split, curr_class, image_name):
@@ -266,12 +266,12 @@ class PerturbImages(Noises):
             if curr_class == 'dog':
                 new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/dog/"+image_name
                 cv2.imwrite(new_im_path,image)
-                print(f"Saving image to {new_im_path}")
+                #print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
             else:
                 new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/cat/"+image_name
                 cv2.imwrite(new_im_path,image)
-                print(f"Saving image to {new_im_path}")
+                #print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
     
     def add_all_increase_brightness(self, original_image,  id_path, split, curr_class, image_name):
@@ -282,12 +282,12 @@ class PerturbImages(Noises):
             if curr_class == 'dog':
                 new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/dog/"+image_name
                 cv2.imwrite(new_im_path,image)
-                print(f"Saving image to {new_im_path}")
+                #print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
             else:
                 new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/cat/"+image_name
                 cv2.imwrite(new_im_path,image)
-                print(f"Saving image to {new_im_path}")
+                #print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
     
     def add_all_decrease_brightness(self, original_image,  id_path, split, curr_class, image_name):
@@ -298,12 +298,12 @@ class PerturbImages(Noises):
             if curr_class == 'dog':
                 new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/dog/"+image_name
                 cv2.imwrite(new_im_path,image)
-                print(f"Saving image to {new_im_path}")
+                #print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
             else:
                 new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/cat/"+image_name
                 cv2.imwrite(new_im_path,image)
-                print(f"Saving image to {new_im_path}")
+                #print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
     
     def add_all_hue_noises(self, original_image,  id_path, split, curr_class, image_name):
@@ -315,12 +315,12 @@ class PerturbImages(Noises):
             if curr_class == 'dog':
                 new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/dog/"+image_name
                 cv2.imwrite(new_im_path,image)
-                print(f"Saving image to {new_im_path}")
+                #print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
             else:
                 new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/cat/"+image_name
                 cv2.imwrite(new_im_path,image)
-                print(f"Saving image to {new_im_path}")
+                #print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
                 #
 
@@ -333,12 +333,12 @@ class PerturbImages(Noises):
             if curr_class == 'dog':
                 new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/dog/"+image_name
                 cv2.imwrite(new_im_path,image)
-                print(f"Saving image to {new_im_path}")
+                #print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
             else:
                 new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/cat/"+image_name
                 cv2.imwrite(new_im_path,image)
-                print(f"Saving image to {new_im_path}")
+                #print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
                 #
 
@@ -362,5 +362,5 @@ class PerturbImages(Noises):
 if __name__ == "__main__":
     # Create robustness folder placeholder
     perturbimages = PerturbImages()
-    perturbimages.create_placeholder_dirs()
+    #perturbimages.create_placeholder_dirs()
     perturbimages.perform_perturbations()
