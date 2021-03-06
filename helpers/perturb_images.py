@@ -357,10 +357,29 @@ class PerturbImages(Noises):
                 cv2.imwrite(new_im_path,image)
                 print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
-                #
+    
+    def create_csv_files(self):
+        # Create root directory
+        # Create all directories
+        print("Creating csvs...")
+        for perturb_id in tqdm(self.perturb_ids):
+            print(f"On perturbarbation level 5_{perturb_id}...")
+            for perturb_level in self.perturb_levels:
+                for split in self.splits:
+                    # Create perturbation id folder
+                    full_path = self.robust_path+'/5_'+str(perturb_id)+'/'+str(perturb_level)+'/full_split_'+str(split)+"/"
+                    full_path_dog = full_path+'val/dog/'
+                    full_path_cat = full_path+'val/cat/'
+                    dog_imgs = np.array([[full_path_dog + name, 0] for name in os.listdir(full_path_dog) if os.path.isfile(os.path.join(full_path_dog, name))])
+                    cat_imgs = np.array([[full_path_cat + name, 1] for name in os.listdir(full_path_cat) if os.path.isfile(os.path.join(full_path_cat, name))])
+                    imgs = np.concatenate([dog_imgs, cat_imgs])
+
+                    df = pd.DataFrame({"image_id": imgs[:, 0], "label": imgs[:, 1]})
+                    df.to_csv(full_path+"full_split_val_"+str(split)+".csv")
+
 
 if __name__ == "__main__":
     # Create robustness folder placeholder
     perturbimages = PerturbImages()
     #perturbimages.create_placeholder_dirs()
-    perturbimages.perform_perturbations()
+    perturbimages.create_csv_files()
