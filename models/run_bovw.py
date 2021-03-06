@@ -27,7 +27,7 @@ def retreive_histograms():
 
 def retrieve_accuracies():
     # Define hyperparameter's value range
-    c_range =np.arange(0.5, 100.5, 0.5)
+    c_range =np.arange(0.5, 100.5, 2)
     clusters = [50, 100, 150, 200, 250, 300]
     kernels = ['linear', 'poly', 'rbf']
     # Run through splits and clusters
