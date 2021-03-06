@@ -27,18 +27,18 @@ def retreive_histograms():
 
 def retrieve_accuracies():
     # Define hyperparameter's value range
-    c_range =np.arange(0.5, 100.5, 0.5)
+    c_range =np.arange(0.5, 100.5, 2)
     clusters = [50, 100, 150, 200, 250, 300]
     kernels = ['linear', 'poly', 'rbf']
     # Run through splits and clusters
-    for split in range(1,4):
+    for split in tqdm(range(1,4)):
         # Loop through kernels
-        for k in kernels:
+        for k in tqdm(kernels):
             # Define place holder for accuracie values
             df_train_dict = {}
             df_val_dict = {}
             # Loop through clusters
-            for cluster in cluster:
+            for cluster in tqdm(clusters):
                 # Load data
                 train_histograms = np.load("output/bovw/split_"+str(split)+"/histograms/train/train_visual_words_k_"+str(cluster)+".npy")
                 train_classes = np.load("output/bovw/split_"+str(split)+"/histograms/train/train_classes_k_"+str(cluster)+".npy")
@@ -49,7 +49,7 @@ def retrieve_accuracies():
                 val_accuracies = []
                 # Loop through c values
                 c_vals = []
-                for c in c_range:
+                for c in tqdm(c_range):
                     c_vals.append(c)
                     # Get SVM classifier
                     bovw = BovW(split, "./data")
@@ -77,4 +77,4 @@ def retrieve_accuracies():
 
 
 if __name__=="__main__":
-    retreive_histograms()
+    retrieve_accuracies()
