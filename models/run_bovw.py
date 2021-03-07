@@ -93,7 +93,7 @@ def evaluate_robustness(best_c, best_kernel):
     # Perturbation levels
     perturb_levels = list(range(1,11))
     # Load pre-trained model
-    for split in tqdm(range(3,4)):
+    for split in tqdm(range(1,4)):
         print(f"### On Split {split} ###")
         # Get trained histograms
         train_histograms = np.load("./output/bovw/full_split_"+str(split)+"/histograms/train/train_visual_words_k_250.npy")
@@ -107,7 +107,7 @@ def evaluate_robustness(best_c, best_kernel):
             results_dict = {}
             # Get id folder name
             id_fname = "/5_"+str(perturb_id)
-            output_data_dir = "./output/bovw/robustness/"+id_fname
+            output_data_dir = "./output/bovw/robustness/"+id_fname+"/"
             # Loop through perturbation levels
             for pertur_level in perturb_levels:
                 print(f"On perturbation level {pertur_level}, of perturbation id {perturb_id}")
@@ -115,7 +115,7 @@ def evaluate_robustness(best_c, best_kernel):
                 bovw = BovW(split, input_data_dir, full_split=True)
                 # Get validation information from perturbed images
                 val_df = bovw.get_valid_splits(split)
-                val_dict = bovw.image_reader(val_splits)
+                val_dict = bovw.image_reader(val_df)
                 val_descriptor_list, val_sift_vectors = bovw.sift_features(val_dict)
                 val_histograms, val_classes = bovw.get_histogram_arrays(val_sift_vectors, train_centers)
                 # Train SVM classifier on perturbed images
@@ -124,15 +124,17 @@ def evaluate_robustness(best_c, best_kernel):
                 train_acc = svm_classifier.score(train_histograms, train_classes)
                 val_acc = svm_classifier.score(val_histograms, val_classes)
                 # Append accuracy values
+                print(f"Accuracy of {val_acc} on 5_{perturb_id} of level {pertur_level}.")
                 best_accs.append(val_acc)
-
+            
             # Store results
             results_dict['perturb_level'] = perturb_levels
             results_dict['best_accs'] = best_accs
             results_df = pd.DataFrame.from_dict(results_dict)
             # Ouput results to .csv file
             csv_fname = output_data_dir+"full_split_"+str(split)+"/robustness_results_5_"+str(perturb_id)+".csv"
+            print(f"Outputting appending data to {csv_fname}...")
             results_df.to_csv(csv_fname, index=False)
 
 if __name__=="__main__":
-    train_full_splits(250)
+    evaluate_robustness(2.5, 'rbf')
