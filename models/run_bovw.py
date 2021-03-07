@@ -101,7 +101,8 @@ def evaluate_robustness(best_c, best_kernel):
         train_centers = np.load("./output/bovw/full_split_"+str(split)+"/histograms/train/train_centers_k_250.npy")
         
         # Instantiate network
-        for perturb_id in perturb_ids[3:]:
+        # Skip level 5_4 since something is happening  with Nones, we can debug it ad the end
+        for perturb_id in perturb_ids[4:]:
         #for perturb_id in [4]:
             # Initialize list to store accuracies
             best_accs = []
@@ -110,7 +111,7 @@ def evaluate_robustness(best_c, best_kernel):
             id_fname = "/5_"+str(perturb_id)
             output_data_dir = "./output/bovw/robustness/"+id_fname+"/"
             # Loop through perturbation levels
-            for pertur_level in perturb_levels[6:]:
+            for pertur_level in perturb_levels:
             #for pertur_level in [7]:
                 print(f"On perturbation level {pertur_level}, of perturbation id {perturb_id}")
                 input_data_dir = "./data/robustness"+id_fname+"/"+str(pertur_level)

@@ -1,0 +1,41 @@
+.
+├── README.md
+├── catdog
+│   ├── CATS
+│   ├── DOGS
+│   └── catdogs.csv
+├── catdogs.csv
+├── data
+│   ├── full_split_1
+│   ├── full_split_2
+│   ├── full_split_3
+│   ├── robustness
+│   ├── split_1
+│   ├── split_2
+│   └── split_3
+├── environment.yml
+├── figs
+│   ├── bovw
+│   └── resnet18
+├── full_split_val_1.csv
+├── full_split_val_2.csv
+├── helpers
+│   ├── data_loader.py
+│   └── perturb_images.py
+├── models
+│   ├── bovw.py
+│   ├── notebooks
+│   ├── resnet18.py
+│   ├── run_bovw.py
+│   └── run_resnet18.py
+├── output
+│   ├── bovw
+│   └── resnet18
+├── resnet_data_analyser.ipynb
+├── resnet_robustness_tests.ipynb
+├── bovw_data_analyser.ipynb
+├── bovw_notebook.ipynb
+└── split_data.ipynb
+
+
+26 directories, 23 files
