@@ -40,6 +40,20 @@ class BovW:
         val_df = pd.read_csv(path+'val.csv')
 
         return train_df, val_df
+    
+    def get_valid_splits(self, split_n):
+        '''
+        Receives the number of the split split_n and outputs the validation
+        pandas dataframes.
+        '''
+        if self.full_split:
+            path = self.data_dir+str(split_n)+'/full_split_val_'+str(split_n)+".csv"
+        else:
+            path = self.data_dir+str(split_n)+'/split_'+str(split_n)+"_"
+        
+        val_df = pd.read_csv(path)
+
+        return val_df
 
     def image_reader(self, dataframe):
         '''
@@ -123,10 +137,10 @@ class BovW:
         a dictionary with all the histograms, divided by class
         '''    
         dict_feature = {}
-        for key,value in sift_vectors.items():
+        for key,value in tqdm(sift_vectors.items()):
             print(f"Getting histograms of class {key}...")
             category = []
-            for img in value:
+            for img in tqdm(value):
                 histogram = np.zeros(len(kmeans_centers))
                 for each_feature in img:
                     ind = self.find_index(each_feature, kmeans_centers)
@@ -212,6 +226,7 @@ class BovW:
         else:
             np.save("output/bovw/full_split_"+str(self.split_n)+"/histograms/train/train_visual_words_k_"+str(K_clusters)+".npy", train_histograms)
             np.save("output/bovw/full_split_"+str(self.split_n)+"/histograms/train/train_classes_k_"+str(K_clusters)+".npy", train_classes)
+            np.save("output/bovw/full_split_"+str(self.split_n)+"/histograms/train/train_centers_k_"+str(K_clusters)+".npy", train_centers)
             np.save("output/bovw/full_split_"+str(self.split_n)+"/histograms/val/val_visual_words_k_"+str(K_clusters)+".npy", val_histograms)
             np.save("output/bovw/full_split_"+str(self.split_n)+"/histograms/val/val_classes_k_"+str(K_clusters)+".npy", val_classes)
 
