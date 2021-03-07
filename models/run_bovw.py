@@ -101,7 +101,8 @@ def evaluate_robustness(best_c, best_kernel):
         train_centers = np.load("./output/bovw/full_split_"+str(split)+"/histograms/train/train_centers_k_250.npy")
         
         # Instantiate network
-        for perturb_id in perturb_ids:
+        for perturb_id in perturb_ids[3:]:
+        #for perturb_id in [4]:
             # Initialize list to store accuracies
             best_accs = []
             results_dict = {}
@@ -109,12 +110,14 @@ def evaluate_robustness(best_c, best_kernel):
             id_fname = "/5_"+str(perturb_id)
             output_data_dir = "./output/bovw/robustness/"+id_fname+"/"
             # Loop through perturbation levels
-            for pertur_level in perturb_levels:
+            for pertur_level in perturb_levels[6:]:
+            #for pertur_level in [7]:
                 print(f"On perturbation level {pertur_level}, of perturbation id {perturb_id}")
                 input_data_dir = "./data/robustness"+id_fname+"/"+str(pertur_level)
                 bovw = BovW(split, input_data_dir, full_split=True)
                 # Get validation information from perturbed images
                 val_df = bovw.get_valid_splits(split)
+                print("Getting validation images...")
                 val_dict = bovw.image_reader(val_df)
                 val_descriptor_list, val_sift_vectors = bovw.sift_features(val_dict)
                 val_histograms, val_classes = bovw.get_histogram_arrays(val_sift_vectors, train_centers)

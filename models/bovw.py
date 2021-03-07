@@ -95,8 +95,11 @@ class BovW:
             features = []
             for img in value:
                 kp, des = sift.detectAndCompute(img,None)
-                descriptor_list.extend(des)
-                features.append(des)
+                try:
+                    descriptor_list.extend(des)
+                    features.append(des)
+                except:
+                    print(f"Faulty descriptor found : {des}")
             sift_vectors[key] = features
 
         return descriptor_list, sift_vectors
@@ -145,7 +148,8 @@ class BovW:
                 for each_feature in img:
                     ind = self.find_index(each_feature, kmeans_centers)
                     histogram[ind] += 1
-                category.append(histogram)
+                    category.append(histogram)
+
             dict_feature[key] = category
         return dict_feature
 
