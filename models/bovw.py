@@ -73,9 +73,15 @@ class BovW:
                 image = cv2.cvtColor(image,cv2.COLOR_GRAY2RGB)
             
             if labels[i] == 0:
-                category_0.append(image)
+                if img is not None:
+                    category_0.append(image)
+                else:
+                    print("None image")
             else:
-                category_1.append(image)
+                if img is not None:
+                    category_1.append(image)
+                else:
+                    print("None image")
 
         image_dict[0] = category_0
         image_dict[1] = category_1

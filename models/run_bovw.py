@@ -102,6 +102,12 @@ def evaluate_robustness(best_c, best_kernel):
         
         # Instantiate network
         # Skip level 5_4 since something is happening  with Nones, we can debug it ad the end
+        if split == 1:
+            perturb_ids = [4]
+        if split == 2:
+            perturb_ids = [1,2,3,4,7,8,9,10]
+        if split == 3:
+            perturb_ids = [1,2,3,4,5,6,7,8,9,10]
         for perturb_id in perturb_ids[4:]:
         #for perturb_id in [4]:
             # Initialize list to store accuracies
