@@ -73,12 +73,12 @@ class BovW:
                 image = cv2.cvtColor(image,cv2.COLOR_GRAY2RGB)
             
             if labels[i] == 0:
-                if img is not None:
+                if image is not None:
                     category_0.append(image)
                 else:
                     print("None image")
             else:
-                if img is not None:
+                if image is not None:
                     category_1.append(image)
                 else:
                     print("None image")
@@ -100,12 +100,15 @@ class BovW:
         for key,value in images.items():
             features = []
             for img in value:
-                kp, des = sift.detectAndCompute(img,None)
-                try:
+                kp, des = sift.detectAndCompute(img, None)
+                if len(kp) < 1:
+                    no_kp = np.zeros((1, sift.descriptorSize()), np.float32)
+                    descriptor_list.extend(no_kp)
+                    features.append(no_kp)
+                else:
                     descriptor_list.extend(des)
                     features.append(des)
-                except:
-                    print(f"Faulty descriptor found : {des}")
+
             sift_vectors[key] = features
 
         return descriptor_list, sift_vectors

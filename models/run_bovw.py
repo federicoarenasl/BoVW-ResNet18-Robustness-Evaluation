@@ -93,7 +93,7 @@ def evaluate_robustness(best_c, best_kernel):
     # Perturbation levels
     perturb_levels = list(range(1,11))
     # Load pre-trained model
-    for split in tqdm(range(1,4)):
+    for split in tqdm(range(3,4)):
         print(f"### On Split {split} ###")
         # Get trained histograms
         train_histograms = np.load("./output/bovw/full_split_"+str(split)+"/histograms/train/train_visual_words_k_250.npy")
@@ -103,13 +103,13 @@ def evaluate_robustness(best_c, best_kernel):
         # Instantiate network
         # Skip level 5_4 since something is happening  with Nones, we can debug it ad the end
         if split == 1:
-            perturb_ids = [4]
+            perturb_ids = [4] # This one is creating problems for all splits, we must debug it
         if split == 2:
-            perturb_ids = [1,2,3,4,7,8,9,10]
+            perturb_ids = [4]
         if split == 3:
-            perturb_ids = [1,2,3,4,5,6,7,8,9,10]
-        for perturb_id in perturb_ids:
-        #for perturb_id in [4]:
+            perturb_ids = [4]
+        #for perturb_id in perturb_ids:
+        for perturb_id in [4]:
             # Initialize list to store accuracies
             best_accs = []
             results_dict = {}
