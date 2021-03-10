@@ -93,7 +93,7 @@ def evaluate_robustness(best_c, best_kernel):
     # Perturbation levels
     perturb_levels = list(range(1,11))
     # Load pre-trained model
-    for split in tqdm(range(3,4)):
+    for split in tqdm(range(1,3)):
         print(f"### On Split {split} ###")
         # Get trained histograms
         train_histograms = np.load("./output/bovw/full_split_"+str(split)+"/histograms/train/train_visual_words_k_250.npy")
