@@ -28,7 +28,7 @@ class Noises:
         the same image with noise added to it.
         '''
         gauss = normal(0, std, img.shape).astype('uint8')
-        img_gauss = cv2.add(img,gauss)
+        img_gauss = img+gauss
         image = np.clip(img_gauss, 0, 255)
                         
         return image
@@ -186,7 +186,7 @@ class PerturbImages(Noises):
                 # Start perturbations of current image
                 # Add gaussian noise
                 #print(f"Adding noise...")
-                #self.add_all_gaussian_noise(original_image, "5_1", split, curr_class, image_name)
+                self.add_all_gaussian_noise(original_image, "5_1", split, curr_class, image_name)
                 # Add gaussian blurr
                 #self.add_all_gaussian_blurr(original_image, "5_2", split, curr_class, image_name)
                 #print(f"Done with image {im_path}...")
@@ -208,7 +208,7 @@ class PerturbImages(Noises):
                 # Add sat noises
                 #self.add_all_sat_noises(original_image, "5_8", split, curr_class, image_name)
                 # Add occlusions
-                self.add_all_image_occlusions(original_image, "5_9", split, curr_class, image_name)
+                #self.add_all_image_occlusions(original_image, "5_9", split, curr_class, image_name)
 
     def add_all_gaussian_noise(self, original_image,  id_path, split, curr_class, image_name):
         self.stds = np.arange(0, 19, 2)
@@ -218,12 +218,12 @@ class PerturbImages(Noises):
             if curr_class == 'dog':
                 new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/dog/"+image_name
                 cv2.imwrite(new_im_path,image)
-                #print(f"Saving image to {new_im_path}")
+                print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
             else:
                 new_im_path = self.robust_path+"/"+id_path+"/"+str(l+1)+"/full_split_"+str(split)+"/val/cat/"+image_name
                 cv2.imwrite(new_im_path,image)
-                #print(f"Saving image to {new_im_path}")
+                print(f"Saving image to {new_im_path}")
                 #copyfile(old_path, new_im_path)
     
     def add_all_gaussian_blurr(self, original_image,  id_path, split, curr_class, image_name):
@@ -382,4 +382,5 @@ if __name__ == "__main__":
     # Create robustness folder placeholder
     perturbimages = PerturbImages()
     #perturbimages.create_placeholder_dirs()
-    perturbimages.create_csv_files()
+    #perturbimages.create_csv_files()
+    perturbimages.perform_perturbations()
