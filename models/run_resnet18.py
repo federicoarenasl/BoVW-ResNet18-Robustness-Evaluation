@@ -69,15 +69,11 @@ def evaluate_robustness():
     # Perturbation levels
     perturb_levels = list(range(1,11))
     # Load pre-trained model
-    for split in tqdm(range(3,4)):
+    for split in tqdm(range(1,4)):
         print(f"### On Split {split} ###")
         pretrained = torch.load("./output/resnet18/full_split_"+str(split)+"/weights/trained_model.pth")
         # Instantiate network
-        if split == 3:
-            perturbations = [3]
-        else:
-            perturbations = perturb_ids
-        for perturb_id in perturbations:
+        for perturb_id in [1]:
             # Initialize list to store accuracies
             best_accs = []
             results_dict = {}
