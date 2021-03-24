@@ -10,3 +10,4 @@ output/bovw/train_sift_vectors.npy
 *.pth
 *.png
 .vscode/
+*.ipynb
