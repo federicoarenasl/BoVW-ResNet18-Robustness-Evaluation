@@ -34,7 +34,7 @@ We seek to evaluate the performance of two models. The first model is the Bag of
 
 All the histograms corresponding to each image in the dataset is then projected into a a vector space, where a regular linear or non-linear classifier can be applied, in our case we use Support Vector Machines to classify whether an image is a cat or a dog, as follows (the dark points are cats, and the light ones are dogs).
 <p align="center">
-<img  src="figs/bovw2.png" width="600">
+<img  src="figs/bovw2.PNG" width="600">
 </p>
 
 The second model, and following the current state of the art, is a ResNet18 model, which follows the VGG CNN architecture and uses skip connections on top of that to solve the vanishing gradient problem that is present in deep convolutional networks. An illustration of this architecture from [this blog](https://towardsdatascience.com/an-overview-of-resnet-and-its-variants-5281e2f56035) is shown below.
