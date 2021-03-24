@@ -1,6 +1,6 @@
 # Image and Vision Computing
 
-This repository contains the code for the University of Edinburgh [School of Informatics](http://www.inf.ed.ac.uk) course [Machine Learning Practical](https://www.learn.ed.ac.uk/webapps/blackboard/execute/launcher?type=Course&id=_57835_1).
+This repository contains the code for the University of Edinburgh [School of Informatics](http://www.inf.ed.ac.uk) course [Image and Vision Computing](https://www.learn.ed.ac.uk/webapps/blackboard/execute/launcher?type=Course&id=_57835_1).
 
 This course is focused on learning how images are formed given the objects in the three dimensional world, and the basics of how computer vision inverts this process. Students who take this couse will have an excellent understanding of image formation, low-level image analysis, image representation and high-level analysis, as well as their applications.
 
